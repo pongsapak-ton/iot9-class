@@ -1,7 +1,7 @@
 # Washing machine state
 
 ## START
-topic:v1cdti/app/get/6310301020/model-01/sn-01
+topic:v1cdti/app/get/6310301020/model-01/SN-001
 payload: {
     "action"    :   "get",
     "project"   :   "6310301020",
@@ -17,7 +17,7 @@ payload: {
     "action"    :   "get",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
+    "serial"    :   "SN-001",
     "name"      :   "STATUS",
     "value"     :   "READY"
 }
@@ -28,7 +28,7 @@ payload: {
     "action"    :   "get",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
+    "serial"    :   "SN-001",
     "name"      :   "STATUS",
     "value"     :   "FillWater"
 }
@@ -95,9 +95,9 @@ payload: {
     "action"    :   "set",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
-    "name"      :   "STATUS",
-    "value"     :   "WaterFullLevel"
+    "serial"    :   "SN-001",
+    "name"      :   "WaterLevel",
+    "value"     :   "WaterFull"
 }
 
 ## TEMPERATUREREACHED
@@ -106,9 +106,9 @@ payload: {
     "action"    :   "set",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
-    "name"      :   "STATUS",
-    "value"     :   "TEMPERATUREREACHED"
+    "serial"    :   "SN-001",
+    "name"      :   "Temperature",
+    "value"     :   "REACHED"
 }
 
 
@@ -120,8 +120,8 @@ payload: {
     "action"    :   "get",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
-    "name"      :   "STATUS",
+    "serial"    :   "SN-001",
+    "name"      :   "FAULT-state",
     "value"     :   "TimeOut"
 }
 
@@ -131,9 +131,9 @@ payload: {
     "action"    :   "set",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
-    "name"      :   "STATUS",
-    "value"     :   "TimeOut"
+    "serial"    :   "SN-001",
+    "name"      :   "FAULT-state",
+    "value"     :   "OutofBalance"
 }
 
 
@@ -143,9 +143,9 @@ payload: {
     "action"    :   "set",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
-    "name"      :   "STATUS",
-    "value"     :   "TimeOut"
+    "serial"    :   "SN-001",
+    "name"      :   "FAULT-state",
+    "value"     :   "MOTORFAILURE"
 }
 
 
@@ -155,7 +155,24 @@ payload: {
     "action"    :   "set",
     "project"   :   "6310301020",
     "model"     :   "model-01",
-    "serial"    :   "sn-01",
-    "name"      :   "STATUS",
-    "value"     :   "FAULTCLEARED"
+    "serial"    :   "SN-001",
+    "name"      :   "FAULT-state",
+    "value"     :   "Clear"
 }
+
+
+  if w.MACHINE_STATUS == 'WaterHeat':
+                wait = w.waiting_task()
+                await wait
+                while w.MACHINE_STATUS == 'WaterHeat':
+                    await asyncio.sleep(2)
+        
+        if w.MACHINE_STATUS == 'FAULT':
+            await publish_message(w, client, 'app', 'get', 'FAULT', w.FAULT_TYPE)
+            while w.MACHINE_STATUS == 'FAULT':
+                print(f"{time.ctime()} - [{w.SERIAL}] Waiting to clear fault...")
+                await asyncio.sleep(1)
+
+        if w.MACHINE_STATUS == 'WASHING':
+            continue
+                
